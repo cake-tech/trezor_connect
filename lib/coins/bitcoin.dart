@@ -89,6 +89,46 @@ extension TrezorConnectBitcoin on TrezorConnect {
     return completer.future;
   }
 
+  Future<List<TrezorAddressPublicKey>?> getPublicKeyBundle(
+      List<TrezorGetPublicKeyParams> params) {
+    final completer = Completer<List<TrezorAddressPublicKey>>();
+
+    final paramsList = <Map<String, dynamic>>[];
+
+    for (final param in params) {
+      paramsList.add({
+        'path': param.path,
+        'showOnTrezor': param.showOnTrezor,
+        'chunkify': param.chunkify,
+        if (param.coin != null) 'coin': param.coin,
+        if (param.scriptType != null) 'scriptType': param.scriptType,
+        if (param.ignoreXpubMagic != null) 'ignoreXpubMagic': param
+            .ignoreXpubMagic,
+      });
+    }
+
+    launchDeeplink(
+      method: "getPublicKey",
+      params: {'bundle': paramsList},
+      callback: (Uri uri) {
+        Map<String, dynamic> response = jsonDecode(
+          uri.queryParameters["response"]!,
+        );
+
+        final responseBundle = response["payload"] as List;
+        final responseList = <TrezorAddressPublicKey>[];
+
+        for (final response in responseBundle) {
+          responseList.add(TrezorAddressPublicKey.fromJson(response));
+        }
+
+        completer.complete(responseList);
+      },
+    );
+
+    return completer.future;
+  }
+
   /// [path] in BIP44 path scheme or Array of hardened numbers. minimum length is 5.
   /// [coin] determines network definition specified in coins.json file. Coin shortcut, name or label can be used. If coin is not set API will try to get network definition from path.
   Future<TrezorMessageSignature?> signMessage(

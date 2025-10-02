@@ -16,6 +16,28 @@ class TrezorGetAddressParams {
   });
 }
 
+class TrezorGetPublicKeyParams {
+  final String path;
+  final bool showOnTrezor;
+  final bool chunkify;
+  final String? address;
+  final String? coin;
+  final String? scriptType;
+  final bool suppressBackupWarning;
+  final bool? ignoreXpubMagic;
+
+  const TrezorGetPublicKeyParams({
+    required this.path,
+    this.showOnTrezor = true,
+    this.chunkify = false,
+    this.suppressBackupWarning = false,
+    this.address,
+    this.coin,
+    this.scriptType,
+    this.ignoreXpubMagic,
+  });
+}
+
 class TrezorAddress {
   final String address;
   final List<int> path;

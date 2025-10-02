@@ -41,12 +41,6 @@ extension TrezorConnectEthereum on TrezorConnect {
     return completer.future;
   }
 
-  /// Display requested address derived by given BIP32 path on device and returns it to caller. User is presented with a description of the requested key and asked to confirm the export on Trezor.
-  ///
-  /// [path] minimum length is 5.
-  /// [address] (Optional) address for validation
-  /// [showOnTrezor] (Optional) determines if address will be displayed on device. Default is set to true
-  /// [chunkify] (Optional) determines if address will be displayed in chunks of 4 characters. Default is set to false
   Future<List<TrezorAddress>?> ethereumGetAddressBundle(
     List<TrezorGetAddressParams> params,
   ) {

@@ -117,6 +117,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> signETHMessage() async {
+    final res = await widget.trezorConnect.ethereumSignMessage(
+      "m/44'/60'/0'/0/0",
+      message: "Hey Trezor!",
+    );
+
+    developer.log("${res?.address}, ${res?.signature}");
+    if (res != null) {
+      setState(() => response = res.signature);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
@@ -150,6 +162,7 @@ class _HomePageState extends State<HomePage> {
             children: <Widget>[
               TextButton(onPressed: getETHAddress, child: Text("Get Address")),
               TextButton(onPressed: get10ETHAddress, child: Text("Get 10 Addresses")),
+              TextButton(onPressed: signETHMessage, child: Text("Sign message \"Hey Trezor!\"")),
             ],
           ),
         ],
