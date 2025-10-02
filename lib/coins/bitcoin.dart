@@ -4,8 +4,6 @@ import 'dart:core';
 
 import 'package:trezor_connect/trezor_connect.dart';
 
-import '../models.dart';
-
 extension TrezorConnectBitcoin on TrezorConnect {
   // ToDo (Konsti): signTransaction
 
@@ -90,7 +88,8 @@ extension TrezorConnectBitcoin on TrezorConnect {
   }
 
   Future<List<TrezorAddressPublicKey>?> getPublicKeyBundle(
-      List<TrezorGetPublicKeyParams> params) {
+    List<TrezorGetPublicKeyParams> params,
+  ) {
     final completer = Completer<List<TrezorAddressPublicKey>>();
 
     final paramsList = <Map<String, dynamic>>[];
@@ -102,8 +101,8 @@ extension TrezorConnectBitcoin on TrezorConnect {
         'chunkify': param.chunkify,
         if (param.coin != null) 'coin': param.coin,
         if (param.scriptType != null) 'scriptType': param.scriptType,
-        if (param.ignoreXpubMagic != null) 'ignoreXpubMagic': param
-            .ignoreXpubMagic,
+        if (param.ignoreXpubMagic != null)
+          'ignoreXpubMagic': param.ignoreXpubMagic,
       });
     }
 
@@ -135,6 +134,7 @@ extension TrezorConnectBitcoin on TrezorConnect {
     String path, {
     required String message,
     String? coin,
+    bool? hex,
   }) {
     final completer = Completer<TrezorMessageSignature>();
     launchDeeplink(
@@ -143,6 +143,7 @@ extension TrezorConnectBitcoin on TrezorConnect {
         'path': path,
         'message': message,
         if (coin != null) 'coin': coin,
+        if (hex != null) 'hex': hex,
       },
       callback: (Uri uri) {
         Map<String, dynamic> response = jsonDecode(
