@@ -1,3 +1,21 @@
+class TrezorGetAddressParams {
+  final String path;
+  final bool showOnTrezor;
+  final bool chunkify;
+  final String? address;
+  final String? coin;
+  final String? scriptType;
+
+  const TrezorGetAddressParams({
+    required this.path,
+    this.showOnTrezor = true,
+    this.chunkify = false,
+    this.address,
+    this.coin,
+    this.scriptType,
+  });
+}
+
 class TrezorAddress {
   final String address;
   final List<int> path;

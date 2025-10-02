@@ -72,6 +72,28 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> get10ETHAddress() async {
+    final res = await widget.trezorConnect.ethereumGetAddressBundle([
+      TrezorGetAddressParams(path: "m/44'/60'/0'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/1'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/2'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/3'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/4'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/5'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/6'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/7'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/8'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/9'/0/0"),
+      TrezorGetAddressParams(path: "m/44'/60'/10'/0/0"),
+    ]
+    );
+
+    developer.log("$res");
+    if (res != null) {
+      setState(() => response = "${res.length}\n$res" );
+    }
+  }
+
   Future<void> getPublicKey() async {
     final res = await widget.trezorConnect.getPublicKey("m/84'/0'");
 
@@ -127,6 +149,7 @@ class _HomePageState extends State<HomePage> {
             title: const Text('Ethereum'),
             children: <Widget>[
               TextButton(onPressed: getETHAddress, child: Text("Get Address")),
+              TextButton(onPressed: get10ETHAddress, child: Text("Get 10 Addresses")),
             ],
           ),
         ],

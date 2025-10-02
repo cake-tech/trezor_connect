@@ -2,6 +2,10 @@ import 'dart:convert';
 
 import 'package:url_launcher/url_launcher.dart';
 
+export 'models.dart';
+export 'coins/bitcoin.dart';
+export 'coins/ethereum.dart';
+
 class TrezorConnect {
   TrezorConnectEnvironment environment;
   String callbackBackUri;

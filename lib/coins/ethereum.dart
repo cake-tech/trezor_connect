@@ -3,8 +3,6 @@ import 'dart:convert';
 
 import 'package:trezor_connect/trezor_connect.dart';
 
-import '../models.dart';
-
 extension TrezorConnectEthereum on TrezorConnect {
   // ToDo(Konsti): ethereumSignTransaction
   // ToDo(Konsti): ethereumSignTypedData
@@ -37,6 +35,50 @@ extension TrezorConnectEthereum on TrezorConnect {
         );
 
         completer.complete(TrezorAddress.fromJson(response["payload"]));
+      },
+    );
+
+    return completer.future;
+  }
+
+  /// Display requested address derived by given BIP32 path on device and returns it to caller. User is presented with a description of the requested key and asked to confirm the export on Trezor.
+  ///
+  /// [path] minimum length is 5.
+  /// [address] (Optional) address for validation
+  /// [showOnTrezor] (Optional) determines if address will be displayed on device. Default is set to true
+  /// [chunkify] (Optional) determines if address will be displayed in chunks of 4 characters. Default is set to false
+  Future<List<TrezorAddress>?> ethereumGetAddressBundle(
+    List<TrezorGetAddressParams> params,
+  ) {
+    final completer = Completer<List<TrezorAddress>>();
+
+    final paramsList = <Map<String, dynamic>>[];
+
+    for (final param in params) {
+      paramsList.add({
+        'path': param.path,
+        if (param.address != null) 'address': param.address,
+        'showOnTrezor': param.showOnTrezor,
+        'chunkify': param.chunkify,
+      });
+    }
+
+    launchDeeplink(
+      method: "ethereumGetAddress",
+      params: {'bundle': paramsList},
+      callback: (Uri uri) {
+        Map<String, dynamic> response = jsonDecode(
+          uri.queryParameters["response"]!,
+        );
+
+        final responseBundle = response["payload"] as List;
+        final responseList = <TrezorAddress>[];
+
+        for (final response in responseBundle) {
+          responseList.add(TrezorAddress.fromJson(response));
+        }
+
+        completer.complete(responseList);
       },
     );
 
