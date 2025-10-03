@@ -144,4 +144,48 @@ extension TrezorConnectEthereum on TrezorConnect {
 
     return completer.future;
   }
+
+  /// Asks device to sign given transaction using the private key derived by given BIP32 path. User is asked to confirm all transaction details on Trezor.
+  ///
+  /// [path] minimum length is 3.
+  /// [message] message to sign in plain text
+  /// [chunkify] (Optional) determines if recipient address will be displayed in chunks of 4 characters. Default is set to false
+  Future<TrezorEthereumSignedTx?> ethereumSignTransaction(
+    String path, {
+    required TrezorEthereumTransaction transaction,
+    bool? chunkify,
+  }) {
+    final completer = Completer<TrezorEthereumSignedTx>();
+
+    launchDeeplink(
+      method: "ethereumSignTransaction",
+      params: {'path': path,
+        'transaction': {
+          'to': transaction.to,
+          'value': transaction.value,
+          if (transaction.data != null) 'data': transaction.data,
+          'chainId': transaction.chainId,
+          'nonce': transaction.nonce,
+          'gasLimit': transaction.gasLimit,
+          if (transaction.gasPrice != null) 'gasPrice': transaction.gasPrice,
+          if (transaction.maxFeePerGas != null) 'maxFeePerGas': transaction
+              .maxFeePerGas,
+          if (transaction.maxPriorityFeePerGas !=
+              null) 'maxPriorityFeePerGas': transaction.maxPriorityFeePerGas,
+          if (transaction.txType != null) 'txType': transaction.txType,
+        },
+        if (chunkify != null) 'chunkify': chunkify},
+      callback: (Uri uri) {
+        Map<String, dynamic> response = jsonDecode(
+          uri.queryParameters["response"]!,
+        );
+
+        completer.complete(
+          TrezorEthereumSignedTx.fromJson(response["payload"]),
+        );
+      },
+    );
+
+    return completer.future;
+  }
 }

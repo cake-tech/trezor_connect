@@ -16,6 +16,32 @@ class TrezorGetAddressParams {
   });
 }
 
+class TrezorEthereumTransaction {
+  final String to;
+  final String value;
+  final String? gasPrice;
+  final String gasLimit;
+  final String? maxFeePerGas;
+  final String? maxPriorityFeePerGas;
+  final String nonce;
+  final String? data;
+  final int chainId;
+  final int? txType;
+
+  const TrezorEthereumTransaction({
+    required this.to,
+    required this.value,
+    required this.gasLimit,
+    required this.nonce,
+    required this.chainId,
+    this.gasPrice,
+    this.maxFeePerGas,
+    this.maxPriorityFeePerGas,
+    this.data,
+    this.txType,
+  });
+}
+
 class TrezorGetPublicKeyParams {
   final String path;
   final bool showOnTrezor;
@@ -117,5 +143,29 @@ class TrezorMessageSignature {
       TrezorMessageSignature._(
         address: payload['address'],
         signature: payload['signature'],
+      );
+}
+
+class TrezorEthereumSignedTx {
+  /// hexadecimal string with "0x" prefix
+  final String v;
+
+  /// hexadecimal string with "0x" prefix
+  final String r;
+
+  /// hexadecimal string with "0x" prefix
+  final String s;
+
+  const TrezorEthereumSignedTx._({
+    required this.v,
+    required this.r,
+    required this.s,
+  });
+
+  static TrezorEthereumSignedTx fromJson(Map<String, dynamic> payload) =>
+      TrezorEthereumSignedTx._(
+        v: payload['v'],
+        r: payload['r'],
+        s: payload['s'],
       );
 }

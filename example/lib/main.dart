@@ -129,6 +129,47 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> signETHEIP1559Tx() async {
+    final res = await widget.trezorConnect.ethereumSignTransaction(
+      "m/44'/60'/0'/0/0",
+      transaction: TrezorEthereumTransaction(
+        to: '0xd0d6d6c5fe4a677d343cc433536bb717bae167dd',
+        value: '0xf4240',
+        data: '0xa',
+        chainId: 1,
+        nonce: '0x0',
+        maxFeePerGas: '0x14',
+        maxPriorityFeePerGas: '0x0',
+        gasLimit: '0x14',
+      ),
+    );
+
+    developer.log("v: ${res?.v}, r: ${res?.r}, s: ${res?.s}");
+    if (res != null) {
+      setState(() => response = "v: ${res.v}, r: ${res.r}, s: ${res.s}");
+    }
+  }
+
+  Future<void> signETHLegacyTx() async {
+    final res = await widget.trezorConnect.ethereumSignTransaction(
+      "m/44'/60'/0'/0/0",
+      transaction: TrezorEthereumTransaction(
+        to: '0x7314e0f1c0e28474bdb6be3e2c3e0453255188f8',
+        value: '0xf4240',
+        data: '0x01',
+        chainId: 1,
+        nonce: '0x0',
+        gasLimit: '0x5208',
+        gasPrice: '0xbebc200',
+      ),
+    );
+
+    developer.log("v: ${res?.v}, r: ${res?.r}, s: ${res?.s}");
+    if (res != null) {
+      setState(() => response = "v: ${res.v}, r: ${res.r}, s: ${res.s}");
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
@@ -163,6 +204,8 @@ class _HomePageState extends State<HomePage> {
               TextButton(onPressed: getETHAddress, child: Text("Get Address")),
               TextButton(onPressed: get10ETHAddress, child: Text("Get 10 Addresses")),
               TextButton(onPressed: signETHMessage, child: Text("Sign message \"Hey Trezor!\"")),
+              TextButton(onPressed: signETHLegacyTx, child: Text("Sign example Legacy Transaction")),
+              TextButton(onPressed: signETHEIP1559Tx, child: Text("Sign example EIP1559 Transaction")),
             ],
           ),
         ],
