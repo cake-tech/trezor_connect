@@ -12,7 +12,10 @@ void main() {
 
 class ExampleApp extends StatelessWidget {
   ExampleApp({super.key})
-    : trezorConnect = TrezorConnect("tcexample://trezor_connect") {
+    : trezorConnect = TrezorConnect(
+        "tcexample://trezor_connect",
+        appName: 'Trezor Connect Example',
+      ) {
     appLinks = AppLinks();
     appLinks.uriLinkStream.listen(trezorConnect.handleCallback);
   }

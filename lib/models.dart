@@ -286,7 +286,7 @@ class TrezorSignedTransaction {
 
   static TrezorSignedTransaction fromJson(Map<String, dynamic> payload) =>
       TrezorSignedTransaction._(
-        signatures: payload['signatures'],
+        signatures: List<String>.from(payload['signatures'] as List),
         serializedTx: payload['serializedTx'],
         txid: payload['txid'],
       );

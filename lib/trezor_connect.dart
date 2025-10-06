@@ -2,16 +2,20 @@ import 'dart:convert';
 
 import 'package:url_launcher/url_launcher.dart';
 
-export 'models.dart';
 export 'coins/bitcoin.dart';
 export 'coins/ethereum.dart';
+export 'models.dart';
 
 class TrezorConnect {
   TrezorConnectEnvironment environment;
   String callbackBackUri;
+  String? appName;
+  String? appIcon;
 
   TrezorConnect(
     this.callbackBackUri, {
+    this.appName,
+    this.appIcon,
     this.environment = TrezorConnectEnvironment.production,
   });
 
@@ -51,7 +55,16 @@ class TrezorConnect {
   ) {
     final paramsEncoded = Uri.encodeQueryComponent(jsonEncode(params));
     final callbackEncoded = Uri.encodeQueryComponent(callback);
-    return "$rootUrl?method=$method&params=$paramsEncoded&callback=$callbackEncoded";
+
+    String suffix = "";
+    if (appName != null) {
+      suffix += "&appName=${Uri.encodeQueryComponent(appName!)}";
+    }
+    if (appIcon != null) {
+      suffix += "&appIcon=${Uri.encodeQueryComponent(appIcon!)}";
+    }
+
+    return "$rootUrl?method=$method&params=$paramsEncoded&callback=$callbackEncoded$suffix";
   }
 
   String registerCallback(TrezorCallback callback) {
