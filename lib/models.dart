@@ -64,6 +64,104 @@ class TrezorGetPublicKeyParams {
   });
 }
 
+class TrezorTxInput {
+  /// previous transaction hash (reversed)
+  final String prevHash;
+
+  /// previous transaction index
+  final int prevIndex;
+
+  final int amount;
+  final int? sequence;
+
+  final String? origHash; // RBF
+  final int? origIndex; // RBF
+
+  /// required if script_type=EXTERNAL
+  final String? scriptPubkey;
+
+  /// bit field of coinjoin-specific flags
+  final int? coinjoinFlags;
+
+  /// used by EXTERNAL, depending on script_pubkey
+  final String? scriptSig;
+
+  /// used by EXTERNAL, depending on script_pubkey
+  final String? witness;
+
+  /// used by EXTERNAL, depending on script_pubkey
+  final String? ownershipProof;
+
+  /// used by EXTERNAL, depending on ownership_proof
+  final String? commitmentData;
+
+  final List<int> addressPath;
+
+  /// SPENDADDRESS, SPENDMULTISIG, SPENDWITNESS, SPENDP2SHWITNESS, SPENDTAPROOT
+  final String? scriptType;
+
+  const TrezorTxInput({
+    required this.prevHash,
+    required this.prevIndex,
+    required this.amount,
+    this.sequence,
+    this.origHash,
+    this.origIndex,
+    this.scriptPubkey,
+    this.coinjoinFlags,
+    this.scriptSig,
+    this.witness,
+    this.ownershipProof,
+    this.commitmentData,
+    required this.addressPath,
+    this.scriptType,
+  });
+
+  Map<String, dynamic> toParams() => {
+    "prev_hash": prevHash,
+    "prev_index": prevIndex,
+    "amount": amount,
+    if (sequence != null) "sequence": sequence,
+    if (origHash != null) "orig_hash": origHash,
+    if (origIndex != null) "orig_index": origIndex,
+    if (scriptPubkey != null) "script_pubkey": scriptPubkey,
+    if (coinjoinFlags != null) "coinjoin_flags": coinjoinFlags,
+    if (scriptSig != null) "script_sig": scriptSig,
+    if (witness != null) "witness": witness,
+    if (ownershipProof != null) "ownership_proof": ownershipProof,
+    if (commitmentData != null) "commitment_data": commitmentData,
+    "address_n": addressPath,
+    if (scriptType != null) "script_type": scriptType,
+  };
+}
+
+class TrezorTxOutput {
+  final String? address;
+  final List<int>? addressPath;
+  final int amount;
+  final String? scriptType;
+  final String? origHash; // RBF
+  final int? origIndex; // RBF
+
+  const TrezorTxOutput({
+    this.address,
+    this.addressPath,
+    required this.amount,
+    this.scriptType,
+    this.origHash,
+    this.origIndex,
+  });
+
+  Map<String, dynamic> toParams() => {
+    if (address != null) "address": address,
+    if (addressPath != null) "address_n": addressPath,
+    "amount": amount,
+    if (scriptType != null) "script_type": scriptType,
+    if (origHash != null) "orig_hash": origHash,
+    if (origIndex != null) "orig_index": origIndex,
+  };
+}
+
 class TrezorAddress {
   final String address;
   final List<int> path;
@@ -167,5 +265,29 @@ class TrezorEthereumSignedTx {
         v: payload['v'],
         r: payload['r'],
         s: payload['s'],
+      );
+}
+
+class TrezorSignedTransaction {
+  /// Array of signer signatures
+  final List<String> signatures;
+
+  /// serialized transaction
+  final String serializedTx;
+
+  /// broadcasted transaction id
+  final String? txid;
+
+  const TrezorSignedTransaction._({
+    required this.signatures,
+    required this.serializedTx,
+    required this.txid,
+  });
+
+  static TrezorSignedTransaction fromJson(Map<String, dynamic> payload) =>
+      TrezorSignedTransaction._(
+        signatures: payload['signatures'],
+        serializedTx: payload['serializedTx'],
+        txid: payload['txid'],
       );
 }

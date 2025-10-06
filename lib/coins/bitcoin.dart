@@ -158,4 +158,34 @@ extension TrezorConnectBitcoin on TrezorConnect {
 
     return completer.future;
   }
+
+  /// Asks device to sign given inputs and outputs of pre-composed transaction. User is asked to confirm all transaction details on Trezor.
+  ///
+  /// [coin] determines network definition specified in coins.json file. Coin shortcut, name or label can be used. If coin is not set API will try to get network definition from path.
+  Future<TrezorSignedTransaction?> signTransaction({
+    required String coin,
+    required List<TrezorTxInput> inputs,
+    required List<TrezorTxOutput> outputs
+  }) {
+    final completer = Completer<TrezorSignedTransaction>();
+    launchDeeplink(
+      method: "signTransaction",
+      params: {
+        'coin': coin,
+        'inputs': inputs.map((e) => e.toParams()).toList(),
+        'outputs': outputs.map((e) => e.toParams()).toList()
+      },
+      callback: (Uri uri) {
+        Map<String, dynamic> response = jsonDecode(
+          uri.queryParameters["response"]!,
+        );
+
+        completer.complete(
+          TrezorSignedTransaction.fromJson(response["payload"]),
+        );
+      },
+    );
+
+    return completer.future;
+  }
 }

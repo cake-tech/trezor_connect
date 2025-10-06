@@ -2,8 +2,6 @@ import 'dart:developer' as developer;
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
-import 'package:trezor_connect/coins/bitcoin.dart';
-import 'package:trezor_connect/coins/ethereum.dart';
 import 'package:trezor_connect/trezor_connect.dart';
 
 void main() {
@@ -85,12 +83,11 @@ class _HomePageState extends State<HomePage> {
       TrezorGetAddressParams(path: "m/44'/60'/8'/0/0"),
       TrezorGetAddressParams(path: "m/44'/60'/9'/0/0"),
       TrezorGetAddressParams(path: "m/44'/60'/10'/0/0"),
-    ]
-    );
+    ]);
 
     developer.log("$res");
     if (res != null) {
-      setState(() => response = "${res.length}\n$res" );
+      setState(() => response = "${res.length}\n$res");
     }
   }
 
@@ -114,6 +111,50 @@ class _HomePageState extends State<HomePage> {
     developer.log("${res?.address}, ${res?.signature}");
     if (res != null) {
       setState(() => response = res.signature);
+    }
+  }
+
+  Future<void> signTransaction() async {
+    final res = await widget.trezorConnect.signTransaction(
+      coin: "btc",
+      inputs: [
+        TrezorTxInput(
+          addressPath: [
+            (44 | 0x80000000) >>> 0,
+            (0 | 0x80000000) >>> 0,
+            (2 | 0x80000000) >>> 0,
+            1,
+            0,
+          ],
+          prevIndex: 0,
+          prevHash:
+              'b035d89d4543ce5713c553d69431698116a822c57c03ddacf3f04b763d1999ac',
+          amount: 3431747,
+        ),
+      ],
+      outputs: [
+        TrezorTxOutput(
+          addressPath: [
+            (44 | 0x80000000) >>> 0,
+            (0 | 0x80000000) >>> 0,
+            (2 | 0x80000000) >>> 0,
+            1,
+            1,
+          ],
+          amount: 3181747,
+          scriptType: 'PAYTOADDRESS',
+        ),
+        TrezorTxOutput(
+          address: '18WL2iZKmpDYWk1oFavJapdLALxwSjcSk2',
+          amount: 200000,
+          scriptType: 'PAYTOADDRESS',
+        ),
+      ],
+    );
+
+    developer.log("${res?.serializedTx}, ${res?.txid}");
+    if (res != null) {
+      setState(() => response = res.txid);
     }
   }
 
@@ -196,16 +237,32 @@ class _HomePageState extends State<HomePage> {
                 onPressed: signMessage,
                 child: Text("Sign message \"Hey Trezor!\""),
               ),
+              TextButton(
+                onPressed: signTransaction,
+                child: Text("Sign Transaction"),
+              ),
             ],
           ),
           ExpansionTile(
             title: const Text('Ethereum'),
             children: <Widget>[
               TextButton(onPressed: getETHAddress, child: Text("Get Address")),
-              TextButton(onPressed: get10ETHAddress, child: Text("Get 10 Addresses")),
-              TextButton(onPressed: signETHMessage, child: Text("Sign message \"Hey Trezor!\"")),
-              TextButton(onPressed: signETHLegacyTx, child: Text("Sign example Legacy Transaction")),
-              TextButton(onPressed: signETHEIP1559Tx, child: Text("Sign example EIP1559 Transaction")),
+              TextButton(
+                onPressed: get10ETHAddress,
+                child: Text("Get 10 Addresses"),
+              ),
+              TextButton(
+                onPressed: signETHMessage,
+                child: Text("Sign message \"Hey Trezor!\""),
+              ),
+              TextButton(
+                onPressed: signETHLegacyTx,
+                child: Text("Sign example Legacy Transaction"),
+              ),
+              TextButton(
+                onPressed: signETHEIP1559Tx,
+                child: Text("Sign example EIP1559 Transaction"),
+              ),
             ],
           ),
         ],
