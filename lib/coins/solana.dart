@@ -3,16 +3,15 @@ import 'dart:convert';
 
 import 'package:trezor_connect/trezor_connect.dart';
 
-extension TrezorConnectEthereum on TrezorConnect {
-  // ToDo(Konsti): ethereumSignTypedData
-
-  /// Display requested address derived by given BIP32 path on device and returns it to caller. User is presented with a description of the requested key and asked to confirm the export on Trezor.
+extension TrezorConnectSolana on TrezorConnect {
+  /// Display requested address derived by given BIP44 path on device and return it to the caller.
+  /// User is presented with a description of the requested address and asked to confirm the export on Trezor.
   ///
-  /// [path] minimum length is 5.
+  /// [path] minimum length is 2.
   /// [address] (Optional) address for validation
   /// [showOnTrezor] (Optional) determines if address will be displayed on device. Default is set to true
   /// [chunkify] (Optional) determines if address will be displayed in chunks of 4 characters. Default is set to false
-  Future<TrezorAddress?> ethereumGetAddress(
+  Future<TrezorAddress?> solanaGetAddress(
     String path, {
     String? address,
     bool showOnTrezor = true,
@@ -21,7 +20,7 @@ extension TrezorConnectEthereum on TrezorConnect {
     final completer = Completer<TrezorAddress>();
 
     launchDeeplink(
-      method: "ethereumGetAddress",
+      method: "solanaGetAddress",
       params: {
         'path': path,
         if (address != null) 'address': address,
@@ -40,7 +39,7 @@ extension TrezorConnectEthereum on TrezorConnect {
     return completer.future;
   }
 
-  Future<List<TrezorAddress>?> ethereumGetAddressBundle(
+  Future<List<TrezorAddress>?> solanaGetAddressBundle(
     List<TrezorGetAddressParams> params,
   ) {
     final completer = Completer<List<TrezorAddress>>();
@@ -57,7 +56,7 @@ extension TrezorConnectEthereum on TrezorConnect {
     }
 
     launchDeeplink(
-      method: "ethereumGetAddress",
+      method: "solanaGetAddress",
       params: {'bundle': paramsList},
       callback: (Uri uri) {
         Map<String, dynamic> response = jsonDecode(
@@ -78,13 +77,14 @@ extension TrezorConnectEthereum on TrezorConnect {
     return completer.future;
   }
 
-  /// Display requested public key derived by given BIP44 path on device and returns it to caller. User is presented with a description of the requested public key and asked to confirm the export.
+  /// Display requested public key derived by given BIP44 path on device and return it to the caller.
+  /// User is presented with a description of the requested public key and asked to confirm the export on Trezor.
   ///
-  /// [path] minimum length is 5.
+  /// [path] minimum length is 2.
   /// [showOnTrezor] (Optional) determines if address will be displayed on device. Default is set to true
   /// [suppressBackupWarning] (Optional) By default, this method will emit an event to show a warning if the wallet does not have a backup. This option suppresses the message.
   /// [chunkify] (Optional) determines if address will be displayed in chunks of 4 characters. Default is set to false
-  Future<TrezorAddressPublicKey?> ethereumGetPublicKey(
+  Future<TrezorAddressPublicKey?> solanaGetPublicKey(
     String path, {
     bool? suppressBackupWarning,
     bool showOnTrezor = true,
@@ -93,7 +93,7 @@ extension TrezorConnectEthereum on TrezorConnect {
     final completer = Completer<TrezorAddressPublicKey>();
 
     launchDeeplink(
-      method: "ethereumGetPublicKey",
+      method: "solanaGetPublicKey",
       params: {
         'path': path,
         if (suppressBackupWarning != null)
@@ -115,65 +115,38 @@ extension TrezorConnectEthereum on TrezorConnect {
     return completer.future;
   }
 
-  /// Asks device to sign a message using the private key derived by given BIP32 path.
+  /// Asks device to sign given transaction. User is asked to confirm all transaction details on Trezor.
   ///
-  /// [path] minimum length is 3.
-  /// [message] message to sign in plain text
-  /// [hex] (Optional) convert message from hex
-  Future<TrezorMessageSignature?> ethereumSignMessage(
+  /// [path] minimum length is 2.
+  /// [serialize] If true, the transaction will be deserialized before signing and serialized back after signing. Without this option, the method will only return the signature by itself.
+  Future<TrezorEthereumSignedTx?> solanaSignTransaction(
     String path, {
-    required String message,
-    bool? hex,
-  }) {
-    final completer = Completer<TrezorMessageSignature>();
-
-    launchDeeplink(
-      method: "ethereumSignMessage",
-      params: {'path': path, 'message': message, if (hex != null) 'hex': hex},
-      callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(
-          TrezorMessageSignature.fromJson(response["payload"]),
-        );
-      },
-    );
-
-    return completer.future;
-  }
-
-  /// Asks device to sign given transaction using the private key derived by given BIP32 path. User is asked to confirm all transaction details on Trezor.
-  ///
-  /// [path] minimum length is 3.
-  /// [message] message to sign in plain text
-  /// [chunkify] (Optional) determines if recipient address will be displayed in chunks of 4 characters. Default is set to false
-  Future<TrezorEthereumSignedTx?> ethereumSignTransaction(
-    String path, {
-    required TrezorEthereumTransaction transaction,
-    bool? chunkify,
+    required String serializedTx,
+    List<TrezorSolanaTxAdditionalInfo>? tokenAccountsInfos,
+    bool? serialize,
   }) {
     final completer = Completer<TrezorEthereumSignedTx>();
 
     launchDeeplink(
-      method: "ethereumSignTransaction",
-      params: {'path': path,
-        'transaction': {
-          'to': transaction.to,
-          'value': transaction.value,
-          if (transaction.data != null) 'data': transaction.data,
-          'chainId': transaction.chainId,
-          'nonce': transaction.nonce,
-          'gasLimit': transaction.gasLimit,
-          if (transaction.gasPrice != null) 'gasPrice': transaction.gasPrice,
-          if (transaction.maxFeePerGas != null) 'maxFeePerGas': transaction
-              .maxFeePerGas,
-          if (transaction.maxPriorityFeePerGas !=
-              null) 'maxPriorityFeePerGas': transaction.maxPriorityFeePerGas,
-          if (transaction.txType != null) 'txType': transaction.txType,
-        },
-        if (chunkify != null) 'chunkify': chunkify},
+      method: "solanaSignTransaction",
+      params: {
+        'path': path,
+        'serializedTx': serializedTx,
+        if (tokenAccountsInfos != null)
+          'additionalInfo': {
+            'tokenAccountsInfos': tokenAccountsInfos.map(
+              (info) => {
+                'baseAddress': info.baseAddress,
+                'tokenProgram': info.tokenProgram,
+                'tokenMint': info.tokenMint,
+                'tokenAccount': info.tokenAccount,
+                if (info.symbol != null) 'symbol': info.symbol,
+                if (info.isDevnet != null) 'isDevnet': info.isDevnet,
+              },
+            ),
+          },
+        if (serialize != null) 'serialize': serialize,
+      },
       callback: (Uri uri) {
         Map<String, dynamic> response = jsonDecode(
           uri.queryParameters["response"]!,
@@ -187,4 +160,22 @@ extension TrezorConnectEthereum on TrezorConnect {
 
     return completer.future;
   }
+}
+
+class TrezorSolanaTxAdditionalInfo {
+  final String baseAddress;
+  final String tokenProgram;
+  final String tokenMint;
+  final String tokenAccount;
+  final String? symbol;
+  final bool? isDevnet;
+
+  const TrezorSolanaTxAdditionalInfo({
+    required this.baseAddress,
+    required this.tokenProgram,
+    required this.tokenMint,
+    required this.tokenAccount,
+    this.symbol,
+    this.isDevnet,
+  });
 }

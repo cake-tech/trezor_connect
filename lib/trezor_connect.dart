@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 export 'coins/bitcoin.dart';
 export 'coins/ethereum.dart';
+export 'coins/solana.dart';
 export 'models.dart';
 
 class TrezorConnect {
@@ -44,7 +45,6 @@ class TrezorConnect {
       "$callbackBackUri?id=$callbackId",
     );
 
-    print(deeplink);
     return launchUrl(Uri.parse(deeplink));
   }
 
