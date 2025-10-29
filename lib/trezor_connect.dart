@@ -45,7 +45,7 @@ class TrezorConnect {
       "$callbackBackUri?id=$callbackId",
     );
 
-    return launchUrl(Uri.parse(deeplink));
+    return launchUrl(Uri.parse(deeplink), mode: LaunchMode.externalApplication);
   }
 
   String getDeeplink(
