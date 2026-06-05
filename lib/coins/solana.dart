@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:trezor_connect/trezor_connect.dart';
 
@@ -28,11 +27,12 @@ extension TrezorConnectSolana on TrezorConnect {
         'chunkify': chunkify,
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(TrezorAddress.fromJson(response["payload"]));
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorAddress.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
     );
 
@@ -59,18 +59,19 @@ extension TrezorConnectSolana on TrezorConnect {
       method: "solanaGetAddress",
       params: {'bundle': paramsList},
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          final responseBundle = payload as List;
+          final responseList = <TrezorAddress>[];
 
-        final responseBundle = response["payload"] as List;
-        final responseList = <TrezorAddress>[];
+          for (final response in responseBundle) {
+            responseList.add(TrezorAddress.fromJson(response));
+          }
 
-        for (final response in responseBundle) {
-          responseList.add(TrezorAddress.fromJson(response));
+          completer.complete(responseList);
+        } catch (e) {
+          completer.completeError(e);
         }
-
-        completer.complete(responseList);
       },
     );
 
@@ -102,13 +103,12 @@ extension TrezorConnectSolana on TrezorConnect {
         'chunkify': chunkify,
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(
-          TrezorAddressPublicKey.fromJson(response["payload"]),
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorAddressPublicKey.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
     );
 
@@ -148,13 +148,12 @@ extension TrezorConnectSolana on TrezorConnect {
         if (serialize != null) 'serialize': serialize,
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(
-          TrezorEthereumSignedTx.fromJson(response["payload"]),
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorEthereumSignedTx.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
     );
 

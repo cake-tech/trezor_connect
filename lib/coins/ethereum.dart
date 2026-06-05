@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:trezor_connect/trezor_connect.dart';
 
@@ -29,11 +28,12 @@ extension TrezorConnectEthereum on TrezorConnect {
         'chunkify': chunkify,
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(TrezorAddress.fromJson(response["payload"]));
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorAddress.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
     );
 
@@ -60,18 +60,19 @@ extension TrezorConnectEthereum on TrezorConnect {
       method: "ethereumGetAddress",
       params: {'bundle': paramsList},
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          final responseBundle = payload as List;
+          final responseList = <TrezorAddress>[];
 
-        final responseBundle = response["payload"] as List;
-        final responseList = <TrezorAddress>[];
+          for (final response in responseBundle) {
+            responseList.add(TrezorAddress.fromJson(response));
+          }
 
-        for (final response in responseBundle) {
-          responseList.add(TrezorAddress.fromJson(response));
+          completer.complete(responseList);
+        } catch (e) {
+          completer.completeError(e);
         }
-
-        completer.complete(responseList);
       },
     );
 
@@ -102,13 +103,12 @@ extension TrezorConnectEthereum on TrezorConnect {
         'chunkify': chunkify,
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(
-          TrezorAddressPublicKey.fromJson(response["payload"]),
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorAddressPublicKey.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
     );
 
@@ -131,13 +131,12 @@ extension TrezorConnectEthereum on TrezorConnect {
       method: "ethereumSignMessage",
       params: {'path': path, 'message': message, if (hex != null) 'hex': hex},
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(
-          TrezorMessageSignature.fromJson(response["payload"]),
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorMessageSignature.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
     );
 
@@ -158,7 +157,8 @@ extension TrezorConnectEthereum on TrezorConnect {
 
     launchDeeplink(
       method: "ethereumSignTransaction",
-      params: {'path': path,
+      params: {
+        'path': path,
         'transaction': {
           'to': transaction.to,
           'value': transaction.value,
@@ -167,21 +167,21 @@ extension TrezorConnectEthereum on TrezorConnect {
           'nonce': transaction.nonce,
           'gasLimit': transaction.gasLimit,
           if (transaction.gasPrice != null) 'gasPrice': transaction.gasPrice,
-          if (transaction.maxFeePerGas != null) 'maxFeePerGas': transaction
-              .maxFeePerGas,
-          if (transaction.maxPriorityFeePerGas !=
-              null) 'maxPriorityFeePerGas': transaction.maxPriorityFeePerGas,
+          if (transaction.maxFeePerGas != null)
+            'maxFeePerGas': transaction.maxFeePerGas,
+          if (transaction.maxPriorityFeePerGas != null)
+            'maxPriorityFeePerGas': transaction.maxPriorityFeePerGas,
           if (transaction.txType != null) 'txType': transaction.txType,
         },
-        if (chunkify != null) 'chunkify': chunkify},
+        if (chunkify != null) 'chunkify': chunkify,
+      },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(
-          TrezorEthereumSignedTx.fromJson(response["payload"]),
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorEthereumSignedTx.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
     );
 
