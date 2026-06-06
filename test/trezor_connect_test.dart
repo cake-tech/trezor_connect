@@ -65,4 +65,13 @@ void main() {
       );
     });
   });
+
+  group('TrezorLaunchException', () {
+    test('toString includes a human-readable hint', () {
+      expect(
+        const TrezorLaunchException().toString(),
+        contains('Trezor Suite is not installed'),
+      );
+    });
+  });
 }

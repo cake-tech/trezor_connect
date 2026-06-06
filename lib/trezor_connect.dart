@@ -135,3 +135,21 @@ class TrezorCallbackException implements Exception {
   @override
   String toString() => 'TrezorCallbackException(code: $code, error: $error)';
 }
+
+/// Thrown when [TrezorConnect.launchDeeplink] could not launch Trezor
+/// Suite — typically because the user has no app installed that handles
+/// the deeplink URL, but also covers platform-level launch restrictions
+/// (iOS LSApplicationQueriesSchemes, Android intent permissions, etc.).
+///
+/// Coin extension methods route this to the awaiting [Completer] via
+/// `completer.completeError`, so the caller's `await` fails fast with
+/// a typed exception instead of hanging until the consumer's own
+/// timeout fires.
+class TrezorLaunchException implements Exception {
+  const TrezorLaunchException();
+
+  @override
+  String toString() =>
+      'TrezorLaunchException — Trezor Suite is not installed or '
+      'could not be launched.';
+}

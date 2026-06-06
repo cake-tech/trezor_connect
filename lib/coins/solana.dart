@@ -34,7 +34,11 @@ extension TrezorConnectSolana on TrezorConnect {
           completer.completeError(e);
         }
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
@@ -73,7 +77,11 @@ extension TrezorConnectSolana on TrezorConnect {
           completer.completeError(e);
         }
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
@@ -110,7 +118,11 @@ extension TrezorConnectSolana on TrezorConnect {
           completer.completeError(e);
         }
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
@@ -155,7 +167,11 @@ extension TrezorConnectSolana on TrezorConnect {
           completer.completeError(e);
         }
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
