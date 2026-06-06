@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:core';
 
 import 'package:trezor_connect/trezor_connect.dart';
@@ -34,13 +33,18 @@ extension TrezorConnectBitcoin on TrezorConnect {
         if (scriptType != null) 'scriptType': scriptType,
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(TrezorAddress.fromJson(response["payload"]));
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorAddress.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
@@ -75,14 +79,18 @@ extension TrezorConnectBitcoin on TrezorConnect {
         if (ignoreXpubMagic != null) 'ignoreXpubMagic': ignoreXpubMagic,
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-        completer.complete(
-          TrezorAddressPublicKey.fromJson(response["payload"]),
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorAddressPublicKey.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
@@ -110,20 +118,25 @@ extension TrezorConnectBitcoin on TrezorConnect {
       method: "getPublicKey",
       params: {'bundle': paramsList},
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          final responseBundle = payload as List;
+          final responseList = <TrezorAddressPublicKey>[];
 
-        final responseBundle = response["payload"] as List;
-        final responseList = <TrezorAddressPublicKey>[];
+          for (final response in responseBundle) {
+            responseList.add(TrezorAddressPublicKey.fromJson(response));
+          }
 
-        for (final response in responseBundle) {
-          responseList.add(TrezorAddressPublicKey.fromJson(response));
+          completer.complete(responseList);
+        } catch (e) {
+          completer.completeError(e);
         }
-
-        completer.complete(responseList);
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
@@ -146,15 +159,18 @@ extension TrezorConnectBitcoin on TrezorConnect {
         if (hex != null) 'hex': hex,
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(
-          TrezorMessageSignature.fromJson(response["payload"]),
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorMessageSignature.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
@@ -165,7 +181,7 @@ extension TrezorConnectBitcoin on TrezorConnect {
   Future<TrezorSignedTransaction?> signTransaction({
     required String coin,
     required List<TrezorTxInput> inputs,
-    required List<TrezorTxOutput> outputs
+    required List<TrezorTxOutput> outputs,
   }) {
     final completer = Completer<TrezorSignedTransaction>();
     launchDeeplink(
@@ -173,18 +189,21 @@ extension TrezorConnectBitcoin on TrezorConnect {
       params: {
         'coin': coin,
         'inputs': inputs.map((e) => e.toParams()).toList(),
-        'outputs': outputs.map((e) => e.toParams()).toList()
+        'outputs': outputs.map((e) => e.toParams()).toList(),
       },
       callback: (Uri uri) {
-        Map<String, dynamic> response = jsonDecode(
-          uri.queryParameters["response"]!,
-        );
-
-        completer.complete(
-          TrezorSignedTransaction.fromJson(response["payload"]),
-        );
+        try {
+          final payload = TrezorConnect.parseResponse(uri);
+          completer.complete(TrezorSignedTransaction.fromJson(payload));
+        } catch (e) {
+          completer.completeError(e);
+        }
       },
-    );
+    ).then((launched) {
+      if (!launched && !completer.isCompleted) {
+        completer.completeError(const TrezorLaunchException());
+      }
+    });
 
     return completer.future;
   }
